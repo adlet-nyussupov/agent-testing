@@ -504,7 +504,7 @@ public class Agent7 extends Agent {
 						if (received.getValue() < actual.getValue()) {
 							System.out.println("\n" + newThis.getAID().getLocalName() + " line analysis result:"
 									+ "\n{One of the lines has better coverage. \nBetter coverage line is: (" + sender
-									+ " " + received + ") > (" + actual + " " + newThis.getLocalName() + ")}\n");
+									+ " " + received + ") < (" + actual + " " + newThis.getLocalName() + ")}\n");
 							return "good";
 						}
 					}
