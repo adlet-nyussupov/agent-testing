@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="lib" path="libraries/asm-all-6.0_BETA.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="libraries/jade.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry kind="lib" path="libraries/JoCoCo/org.jacoco.agent-0.8.1.201803210924.jar"/>
+	<classpathentry kind="lib" path="libraries/JoCoCo/org.jacoco.core-0.8.1.201803210924.jar"/>
+	<classpathentry kind="lib" path="libraries/JoCoCo/org.jacoco.report-0.8.1.201803210924.jar"/>
+	<classpathentry kind="lib" path="libraries/spoon-core-7.4.0-beta-10-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="libraries/groovy-2.5.6.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
