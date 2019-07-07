@@ -21,10 +21,8 @@ public class SUTClass implements Runnable {
 
 	public static boolean f(int a, int b) {
 		if (a < b) {
-			// System.out.println("True");
 			return true;
 		} else {
-			// System.out.println("False");
 			return false;
 		}
 	}

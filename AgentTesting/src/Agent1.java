@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,8 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import groovy.lang.Tuple2;
 import jade.core.AID;
 import jade.core.Agent;
@@ -53,8 +56,8 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
 public class Agent1 extends Agent {
-	private Runnable targetInstance;
-	private Class<?> targetClass;
+	private static Runnable targetInstance;
+	private static Class<?> targetClass;
 	private static ArrayList<String> actualTestSamplesData;
 	private static HashMap<String, Tuple2<Integer, Integer>> actualCoverageData;
 	private static DFAgentDescription[] agentsDF = null;
@@ -70,6 +73,11 @@ public class Agent1 extends Agent {
 	private static int badResultCounter = 0;
 	private static String receiverValue;
 	private static int resultCounter = 0;
+	private static int randomAgentsQuantity = 3;
+	private static ArrayList<String> receivedTestSamplesData;
+	private static boolean executorIsOn = false;
+	private static int requiredCoveragePercentage = 80;
+	private static int actualCoveragePercentage;
 
 	private static HashMap<Integer, Integer> actualLineCoverage;
 
@@ -144,7 +152,7 @@ public class Agent1 extends Agent {
 		if (allAgents.size() != 0) {
 			aclInitialRequest = new ACLMessage(ACLMessage.REQUEST);
 			Collections.shuffle(allAgents);
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < randomAgentsQuantity; i++) {
 				if (i < allAgents.size()) {
 					randAgentID = (AID) allAgents.get(i);
 					aclInitialRequest.addReceiver(randAgentID);
@@ -211,7 +219,7 @@ public class Agent1 extends Agent {
 					case "COVERAGE_IS_WORSE":
 						badResultCounter++;
 						resultCounter++;
-						selectRandomLeaderAgent(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
+						checkCoverageSatisfaction(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
 						sendToNewAgents = doAllReceiverHaveBadResults(badResultCounter, allReceiver);
 						if (sendToNewAgents) {
 							System.out.println("All receiver have bad results. Sending to new random agents.");
@@ -230,10 +238,21 @@ public class Agent1 extends Agent {
 						myAgent.send(rep);
 						ACTUAL_REQUEST = "";
 						break;
-					case "COVERAGE_WAS_IMPROVED":
+					case "COVERAGE_WAS_IMPROVED":	
 						resultCounter++;
-						selectRandomLeaderAgent(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
+						if (aclRequest.getConversationId().contentEquals("TEST_SAMPLES_ID")) {
+							try {
+								receivedTestSamplesData = (ArrayList<String>) aclRequest.getContentObject();
+								actualTestSamplesData.addAll(receivedTestSamplesData);
+							} catch (UnreadableException e) {
+								e.printStackTrace();
+							}
+						}
+						checkCoverageSatisfaction(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
 						ACTUAL_REQUEST = "";
+						
+						
+						
 						break;
 					case "COVERAGE_WAS_NOT_IMPROVED":
 						badResultCounter++;
@@ -243,7 +262,8 @@ public class Agent1 extends Agent {
 							System.out.println("All receiver have bad results. Sending to new random agents.");
 							sendToNewAgents(myAgent);
 						}
-						selectRandomLeaderAgent(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
+						
+						checkCoverageSatisfaction(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
 						ACTUAL_REQUEST = "";
 						break;
 					case "ERROR_UNDEFINED":
@@ -253,6 +273,21 @@ public class Agent1 extends Agent {
 					}
 
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -291,39 +326,28 @@ public class Agent1 extends Agent {
 		sendMessage(newThis, 1);
 	}
 
-	private static void selectRandomLeaderAgent(Agent newThis, Boolean doAllReceiverHaveResults) {
+	private static void checkCoverageSatisfaction(Agent newThis, Boolean doAllReceiverHaveResults) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, IOException {
 		if (doAllReceiverHaveResults) {
-			allAgents.clear();
-			AID localAgentID = newThis.getAID();
-			SearchConstraints conDF = new SearchConstraints();
-			conDF.setMaxResults(new Long(-1));
-			DFAgentDescription dfSearch = new DFAgentDescription();
-			ServiceDescription sdSearch = new ServiceDescription();
-			sdSearch.addProperties(new Property("isCoverageImproved", "true"));
-			dfSearch.addServices(sdSearch);
+			HashSet<String> set = new HashSet<>(actualTestSamplesData);
+			actualTestSamplesData.clear();
+			actualTestSamplesData.addAll(set);
+			executorIsOn = true;
 			try {
-				agentsDF = DFService.search(newThis, dfSearch, conDF);
-			} catch (FIPAException e) {
+				((Agent1) newThis).execute();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			for (int i = 0; i < agentsDF.length; i++) {
-				AID agentID = agentsDF[i].getName();
-				if (localAgentID.compareTo(agentID) != 0) {
-					allAgents.add(agentID);
-				}
+			actualCoveragePercentage = (actualCoverageData.get("line coverage").getFirst() / actualCoverageData.get("line coverage").getSecond())*100;
+			if(actualCoveragePercentage < requiredCoveragePercentage) {
+				System.out.println("Coverage is not satisfied to the requirements");
+				sendToNewAgents(newThis);
+			} else {
+				System.out.println("Coverage is satisfied to the requirements!!!");
 			}
-			if (allAgents.size() != 0) {
-				regAgent(newThis, new Property("isCoverageImproved", "false"), true);
-				aclInitialRequest = new ACLMessage(ACLMessage.REQUEST);
-				Collections.shuffle(allAgents);
-				System.out.println("\nSelected leader: " + allAgents.get(0).getLocalName()+"\n");
-				aclInitialRequest.addReceiver((AID) allAgents.get(0));
-				aclInitialRequest.setConversationId("MESSAGES_ID");
-				aclInitialRequest.setContent("YOU_ARE_LEADER");
-				newThis.send(aclInitialRequest);
-				finish = 1;
-			}
+			
 		}
+		
 	}
 
 	private static void regAgent(Agent newThis, Property value, Boolean deregisterAgent) {
@@ -438,9 +462,23 @@ public class Agent1 extends Agent {
 		return null;
 	}
 
-	public void runTestSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+	public static void runTestSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
-		testSamples();
+		if (executorIsOn) {
+			testSamplesExecutor();
+		} else {
+			testSamples();
+		}
+	}
+	
+	private static void testSamplesExecutor() {
+		Binding binding = new Binding();
+		binding.setVariable("targetClass", targetClass);
+		binding.setVariable("targetInstance", targetInstance);
+		GroovyShell shell = new GroovyShell(binding);
+		for (String testSample : actualTestSamplesData) {
+			shell.evaluate(testSample);
+		}
 	}
 
 	public void testSamplesToString() {
@@ -454,7 +492,7 @@ public class Agent1 extends Agent {
 		}
 	}
 
-	private void testSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+	private static void testSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		targetClass.getMethod("setData", int.class, int.class).invoke(targetInstance, 2, 9);
 	}

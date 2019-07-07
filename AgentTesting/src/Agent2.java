@@ -365,6 +365,9 @@ public class Agent2 extends Agent {
 							rep.setConversationId("MESSAGES_ID");
 							rep.setContent("COVERAGE_WAS_IMPROVED");
 							myAgent.send(rep);
+							rep.setConversationId("TEST_SAMPLES_ID");
+							rep.setContentObject(optimizedTestSamplesData);
+							myAgent.send(rep);
 
 						}
 						break;
@@ -407,8 +410,17 @@ public class Agent2 extends Agent {
 								regAgent(myAgent, new Property("isCoverageImproved", "true"), true);
 								System.out.println("Coverage was improved");
 								rep.setConversationId("MESSAGES_ID");
-								rep.setContent("COVERAGE_WAS_IMPROVED");
+								rep.setContent("COVERAGE_WAS_IMPROVED");	
 								myAgent.send(rep);
+								rep.setConversationId("TEST_SAMPLES_ID");
+								rep.setContentObject(optimizedTestSamplesData);
+								myAgent.send(rep);
+								
+								
+								
+								
+								
+							
 							} else {
 								System.out.println("Coverage was not improved");
 								regAgent(myAgent, new Property("isCoverageImproved", "false"), true);
