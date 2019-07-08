@@ -56,8 +56,8 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
 public class Agent1 extends Agent {
-	private static Runnable targetInstance;
-	private static Class<?> targetClass;
+	private Runnable targetInstance;
+	private Class<?> targetClass;
 	private static ArrayList<String> actualTestSamplesData;
 	private static HashMap<String, Tuple2<Integer, Integer>> actualCoverageData;
 	private static DFAgentDescription[] agentsDF = null;
@@ -76,8 +76,8 @@ public class Agent1 extends Agent {
 	private static int randomAgentsQuantity = 3;
 	private static ArrayList<String> receivedTestSamplesData;
 	private static boolean executorIsOn = false;
-	private static int requiredCoveragePercentage = 80;
-	private static int actualCoveragePercentage;
+	private static float requiredCoveragePercentage = 95;
+	private static float actualCoveragePercentage;
 
 	private static HashMap<Integer, Integer> actualLineCoverage;
 
@@ -197,23 +197,32 @@ public class Agent1 extends Agent {
 			ACLMessage aclRequest = myAgent.receive(requestTemplate);
 			if (aclRequest != null) {
 				try {
+					System.out.println("id "+aclRequest.getConversationId());
 					ACTUAL_REQUEST_SENDER = aclRequest.getSender().getLocalName();
 					if (aclRequest.getConversationId().contentEquals("MESSAGES_ID")) {
 						System.out.println(myAgent.getLocalName() + " received message: " + aclRequest.getContent()
 								+ " from " + aclRequest.getSender().getLocalName());
 						ACTUAL_REQUEST = aclRequest.getContent();
 					}
+					if(aclRequest.getConversationId().contentEquals("TEST_SAMPLES_ID")) {
+						try {
+							receivedTestSamplesData = (ArrayList<String>) aclRequest.getContentObject();
+						} catch (UnreadableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 					ACLMessage rep = aclRequest.createReply();
 					switch (ACTUAL_REQUEST) {
 					case "COVERAGE_IS_BETTER":
-						rep.setConversationId("MESSAGES_ID");
-						rep.setContent("TEST_SAMPLES_WERE_SENT_B");
-						System.out.println(myAgent.getAID().getLocalName() + " sent test samples data to "
-								+ aclRequest.getSender().getLocalName());
-						myAgent.send(rep);
-						rep.setConversationId("TEST_SAMPLES_ID");
-						rep.setContentObject(actualTestSamplesData);
-						myAgent.send(rep);
+						resultCounter++;
+						
+						System.out.println("receivedTestSamplesData"+receivedTestSamplesData);
+						actualTestSamplesData.addAll(receivedTestSamplesData);
+
+					checkCoverageSatisfaction(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
+					ACTUAL_REQUEST = "";
+					
 						ACTUAL_REQUEST = "";
 						break;
 					case "COVERAGE_IS_WORSE":
@@ -240,14 +249,10 @@ public class Agent1 extends Agent {
 						break;
 					case "COVERAGE_WAS_IMPROVED":	
 						resultCounter++;
-						if (aclRequest.getConversationId().contentEquals("TEST_SAMPLES_ID")) {
-							try {
-								receivedTestSamplesData = (ArrayList<String>) aclRequest.getContentObject();
-								actualTestSamplesData.addAll(receivedTestSamplesData);
-							} catch (UnreadableException e) {
-								e.printStackTrace();
-							}
-						}
+			
+							System.out.println("receivedTestSamplesData"+receivedTestSamplesData);
+							actualTestSamplesData.addAll(receivedTestSamplesData);
+
 						checkCoverageSatisfaction(myAgent, doAllReceiverHaveResults(resultCounter, allReceiver));
 						ACTUAL_REQUEST = "";
 						
@@ -289,7 +294,7 @@ public class Agent1 extends Agent {
 				} catch (SecurityException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				} 
 			} else {
 				this.block();
 			}
@@ -338,7 +343,11 @@ public class Agent1 extends Agent {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			actualCoveragePercentage = (actualCoverageData.get("line coverage").getFirst() / actualCoverageData.get("line coverage").getSecond())*100;
+			float covered = actualCoverageData.get("line coverage").getFirst();
+			float overall = actualCoverageData.get("line coverage").getSecond();
+			actualCoveragePercentage = (float) ((covered / overall)*100.0);
+			System.out.println(actualCoveragePercentage);
+			System.out.println(actualTestSamplesData);
 			if(actualCoveragePercentage < requiredCoveragePercentage) {
 				System.out.println("Coverage is not satisfied to the requirements");
 				sendToNewAgents(newThis);
@@ -462,7 +471,7 @@ public class Agent1 extends Agent {
 		return null;
 	}
 
-	public static void runTestSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+	public void runTestSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		if (executorIsOn) {
 			testSamplesExecutor();
@@ -471,7 +480,7 @@ public class Agent1 extends Agent {
 		}
 	}
 	
-	private static void testSamplesExecutor() {
+	private void testSamplesExecutor() {
 		Binding binding = new Binding();
 		binding.setVariable("targetClass", targetClass);
 		binding.setVariable("targetInstance", targetInstance);
@@ -492,7 +501,7 @@ public class Agent1 extends Agent {
 		}
 	}
 
-	private static void testSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+	private void testSamples() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		targetClass.getMethod("setData", int.class, int.class).invoke(targetInstance, 2, 9);
 	}
