@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="libraries/jade.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry kind="lib" path="libraries/spoon-core-7.4.0-beta-10-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="jgoodies-forms-1.8.0.jar" sourcepath="jgoodies-forms-1.8.0-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libraries/bsh-2.0b6.jar"/>
+	<classpathentry kind="lib" path="libraries/groovy-2.5.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Users/Adlet/.p2/pool/plugins/org.evosuite.plugins.eclipse.deps_1.0.7.201806011952/lib/evosuite.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/asm-7.1-20190303.123045-38.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/asm-analysis-7.1-20190303.123049-38.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/asm-commons-7.1-20190303.123051-38.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/asm-test-7.1-20190303.123052-38.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/asm-tree-7.1-20190303.123054-38.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/org.jacoco.agent-0.8.4.201905082037.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/org.jacoco.ant-0.8.4.201905082037.jar"/>
+	<classpathentry kind="lib" path="libraries/JaCoCoNew/org.jacoco.core-0.8.4.201905082037.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
