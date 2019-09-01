@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.jacoco.core.runtime.LoggerRuntime;
 import org.apache.commons.compress.utils.IOUtils;
 import org.jacoco.core.analysis.Analyzer;
@@ -319,8 +322,26 @@ public class MainAgent extends Agent {
 					System.out.println(/* "No new agents. " */ +Constants.round + " rounds were executed.");
 					System.out.println("------------------------------------------------");
 					System.out.println("Round " + Constants.round + " selected test cases:");
+					System.out.println(Constants.SUTClass.getSimpleName()+" "+Constants.SUTClass.getSimpleName().toLowerCase()+" = new "+Constants.SUTClass.getSimpleName()+"();");
 					for (String t : actualTestSamplesData) {
-						System.out.println(t);
+						String method = "";
+						String value = "";	
+						int b = t.indexOf("d(\"");
+						int e = t.indexOf("\",");
+						int d = e-b;
+						if (b != -1 && e != -1 && d > 0) {
+						method = t.substring(b+3, e);
+						//System.out.println(t.substring(b+3, e));
+						}
+						
+						b = t.indexOf(", new Object[] {");
+						e = t.indexOf("});");
+						d = e-b;
+						if (b != -1 && e != -1 && d > 0) {
+						value = t.substring(b+16, e);
+						//System.out.println(t.substring(b+16, e));
+						}
+						System.out.println(Constants.SUTClass.getSimpleName().toLowerCase()+"."+method+"("+value+");");
 					}
 					System.out.println("------------------------------------------------");
 					int newR = Constants.round + 1;
@@ -346,8 +367,26 @@ public class MainAgent extends Agent {
 						System.out.println("------------------------------------------------");
 						System.out.println("Final selected test cases " +actualTestSamplesData.size()+":");
 						System.out.println("------------------------------------------------");
+						System.out.println(Constants.SUTClass.getSimpleName()+" "+Constants.SUTClass.getSimpleName().toLowerCase()+" = new "+Constants.SUTClass.getSimpleName()+"();");
 						for (String t : actualTestSamplesData) {
-							System.out.println(t);
+							String method = "";
+							String value = "";	
+							int b = t.indexOf("d(\"");
+							int e = t.indexOf("\",");
+							int d = e-b;
+							if (b != -1 && e != -1 && d > 0) {
+							method = t.substring(b+3, e);
+							//System.out.println(t.substring(b+3, e));
+							}
+							
+							b = t.indexOf(", new Object[] {");
+							e = t.indexOf("});");
+							d = e-b;
+							if (b != -1 && e != -1 && d > 0) {
+							value = t.substring(b+16, e);
+							//System.out.println(t.substring(b+16, e));
+							}
+							System.out.println(Constants.SUTClass.getSimpleName().toLowerCase()+"."+method+"("+value+");");
 						}
 						System.out.println("------------------------------------------------");
 						System.out.println("Errors: " + Constants.exceptionCounter + ".");
@@ -369,14 +408,31 @@ public class MainAgent extends Agent {
 					System.out.println("------------------------------------------------");
 					System.out.println("Final selected test cases " +actualTestSamplesData.size()+":");
 					System.out.println("------------------------------------------------");
+					System.out.println(Constants.SUTClass.getSimpleName()+" "+Constants.SUTClass.getSimpleName().toLowerCase()+" = new "+Constants.SUTClass.getSimpleName()+"();");
 					for (String t : actualTestSamplesData) {
-						System.out.println(t);
+						String method = "";
+						String value = "";	
+						int b = t.indexOf("d(\"");
+						int e = t.indexOf("\",");
+						int d = e-b;
+						if (b != -1 && e != -1 && d > 0) {
+						method = t.substring(b+3, e);
+						//System.out.println(t.substring(b+3, e));
+						}
+						
+						b = t.indexOf(", new Object[] {");
+						e = t.indexOf("});");
+						d = e-b;
+						if (b != -1 && e != -1 && d > 0) {
+						value = t.substring(b+16, e);
+						//System.out.println(t.substring(b+16, e));
+						}
+						System.out.println(Constants.SUTClass.getSimpleName().toLowerCase()+"."+method+"("+value+");");
 					}
 
 					System.out.println("------------------------------------------------");
 					System.out.println("Errors: " + Constants.exceptionCounter + ".");
 					System.out.println(Constants.exceptions.toString());
-
 					stopAgentPlatform(newThis);
 				}
 

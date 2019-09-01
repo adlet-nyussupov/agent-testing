@@ -19,6 +19,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -67,6 +69,46 @@ public class Test2 {
 	}
 
 	public static void main(String[] args) {
+		String t = "targetClass.getMethod(\"main\", new Class[] {String[].class}).invoke(targetInstance, new Object[] {new java.lang.String[0]});";
+		
+		String method = "";
+		String value = "";	
+		int b = t.indexOf("d(\"");
+		int e = t.indexOf("\",");
+		int d = e-b;
+		if (b != -1 && e != -1 && d > 0) {
+		method = t.substring(b+3, e);
+		//System.out.println(t.substring(b+3, e));
+		}
+		
+		b = t.indexOf(", new Object[] {");
+		e = t.indexOf("});");
+		d = e-b;
+		if (b != -1 && e != -1 && d > 0) {
+		value = t.substring(b+16, e);
+		//System.out.println(t.substring(b+16, e));
+		}
+		System.out.println(Constants.SUTClass.getSimpleName().toLowerCase()+"."+method+"("+value+");");
+		
+		
+		
+		
+		Pattern p = Pattern.compile(".*[Method\\(\\\"](.*)[\\\"\\,].*");
+		Matcher m = p.matcher(t);
+		if(m.find()) {
+		method = m.group(1);
+		//System.out.println(m.group(1));
+		}
+		
+		Pattern p2 = Pattern.compile(".*[\\, new Object\\[\\]] [\\{](.*)[\\}].*");
+		Matcher m2 = p2.matcher(t);
+		if(m2.find()) {
+			value = m2.group(1);
+		System.out.println(m2.group(1));
+		}	
+	//	System.out.println(Constants.SUTClass.getSimpleName().toLowerCase()+"."+method+"("+value+");");
+
+		
 
 		/*
 		 * Launcher spoon = new Launcher(); spoon.addInputResource("./src/");
@@ -83,17 +125,14 @@ public class Test2 {
 
 		// new Food();
 
-		try {
-			new Test2(System.out).execute();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		for (String actual : actualCoverageData.keySet()) {
-			System.out.println(actual + " is: " + actualCoverageData.get(actual).getFirst() + " of "
-					+ actualCoverageData.get(actual).getSecond());
-		}
+		/*
+		 * try { new Test2(System.out).execute(); } catch (Exception e) { // TODO
+		 * Auto-generated catch block e.printStackTrace(); }
+		 * 
+		 * for (String actual : actualCoverageData.keySet()) { System.out.println(actual
+		 * + " is: " + actualCoverageData.get(actual).getFirst() + " of " +
+		 * actualCoverageData.get(actual).getSecond()); }
+		 */
 	}
 
 	public void execute() throws Exception {
